@@ -8,6 +8,8 @@ import extensionData from '../lib/libraries/extensions/index.jsx';
 import {connect} from 'react-redux';
 import {closeConnectionModal} from '../reducers/modals';
 
+import bowser from 'bowser';
+
 class ConnectionModal extends React.Component {
     constructor (props) {
         super(props);
@@ -69,12 +71,16 @@ class ConnectionModal extends React.Component {
         }
     }
     handleError () {
-        // Assume errors that come in during scanning phase are the result of not
-        // having scratch-link installed.
-        if (this.state.phase === PHASES.scanning || this.state.phase === PHASES.unavailable) {
-            this.setState({
-                phase: PHASES.unavailable
-            });
+	// Scratch-Link is not required on Linux Chrome, https://www.chromestatus.com/feature/5264933985976320
+	// Enable Chrome's experimental-web-platform-features: 'chrome://flags/#enable-experimental-web-platform-features'
+	if (!(bowser.chrome && bowser.linux)) {
+            // Assume errors that come in during scanning phase are the result of not
+            // having scratch-link installed.
+            if (this.state.phase === PHASES.scanning || this.state.phase === PHASES.unavailable) {
+                this.setState({
+                    phase: PHASES.unavailable
+                });
+	    }
         } else {
             this.setState({
                 phase: PHASES.error
